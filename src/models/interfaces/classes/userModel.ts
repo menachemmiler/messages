@@ -9,9 +9,12 @@ class User {
     constructor(
         public username:string,
         public password:string,
-        public email:string,
-        public birthday:string,
+        public email:   string,
+        public birthday:Date,
+        public avatarUrl:string
     ) {
         this.id = v4();
     }
-}
+};
+
+export default User;
