@@ -1,21 +1,34 @@
+import NewUserDTO from "DTO/NewUserDTO";
 import exp, { query, Request, Response, Router } from "express";
+import UserService from "../services/userService";
 
 const router: Router = exp.Router();
 
-// 4:משתמשים (users) פןנקציות
 
 // 4.1: register (אימות נתונים (משתמש בפונקציות של auth כנראה)) = ?
-router.post("/register", async (req: Request, res: Response): Promise<void> => {
+router.post("/register", async (
+  req: Request<any, any, NewUserDTO>, 
+  res: Response
+): Promise<void> => {
   try {
-    res.status(200).json({
-      err: false,
-      message: "4.1: register (אימות נתונים (משתמש בפונקציות של 2 כנראה)) = ?",
-      data: undefined,
-    });
+    const resulte:boolean = await UserService.createNewUser(req.body);
+    if(resulte){
+      res.status(201).json({
+        err: false,
+        message: "המשתמש נרשם בהצלחה",
+        data: undefined,
+      });
+    }else{
+      res.json({
+        err: true,
+        message: "המשמש לא נשמר",
+      });
+    }
+
   } catch (err: any) {
     res.status(404).json({
       err: true,
-      message: "defoulte eror",
+      message: "שגיאה ב-הרשמה",
     });
   }
 });
@@ -24,7 +37,10 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
 
 
 // 4.2: follow (הוספת משתמש נוסף לרשימת המשתמשים שאני עוקב אחריו)
-router.post("/follow", async (req: Request, res: Response): Promise<void> => {
+router.post("/follow", async (
+  req: Request<any, any, any>, 
+  res: Response
+): Promise<void> => {
   try {
     res.status(200).json({
       err: false,
