@@ -22,6 +22,7 @@ router.post("/register", async (req: Request, res: Response): Promise<void> => {
 
 
 
+
 // 4.2: follow (הוספת משתמש נוסף לרשימת המשתמשים שאני עוקב אחריו)
 router.post("/follow", async (req: Request, res: Response): Promise<void> => {
   try {
