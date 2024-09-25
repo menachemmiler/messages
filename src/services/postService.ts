@@ -1,24 +1,33 @@
-// import { getFileData } from "DAL/fileDataLayer";
-// import NewUserDTO from "DTO/NewUserDTO";
-// import User from "models/userModel";
+import NewPostDTO from "../DTO/NewPostDTO";
+import { getFileData, saveFileData } from "../DAL/fileDataLayer";
+import Post from "../models/postModel";
 
-// class PostService {
-//     public static async createNewPost(newUser:NewUserDTO):Promise<void>{
-//         //create a new User() obg
-//         const {password, username, email, birthday, avatarUrl} = newUser;
-//         const user:User = new User(username, password, email, birthday, avatarUrl); 
+export default class PostService {
+  public static async getAllPosts(): Promise<Post[] | void> {
+    const allPostsInData = (await getFileData<Post>("posts")) as Post[];
+    return allPostsInData;
+  }
 
-//         //add it to the user file
-//             //get user[]
-//         const users:User[] | void = await getFileData<User>('users');
+  public static async createNewPost(newPost: NewPostDTO): Promise<boolean> {
+    //create a new Post() obg
+    const { authorId, contect, hashTags, ref } = newPost;
+    let post: Post;
+    if (ref) {
+      post = new Post(authorId, contect, hashTags, ref);
+    } else {
+      post = new Post(authorId, contect, hashTags);
+    }
 
-//             //push
-        
+    //add it to the post.json file
+    //get post[]
+    let posts: Post[] | void = (await getFileData<Post>("posts")) as Post[];
+    if (!posts) posts = [];
 
-//             //save the user back to the users file
-//     }
-// };
+    //push
+    posts.push(post);
 
-
-
-//dto 
+    //save the user back to the post.json file
+    const ifSaved: boolean = await saveFileData<Post>("posts", posts);
+    return ifSaved;
+  }
+}

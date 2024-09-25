@@ -9,8 +9,8 @@ export default class UserService {
     const user: User = new User(username, password, email, birthday, avatarUrl);
 
     //get all users list
-    const users: User[] = (await getFileData<User>("users")) as User[];
-    // if(!users)  users = [];
+    let users: User[] = (await getFileData<User>("users")) as User[];
+    if(!users)  users = [];
 
     //push
     users.push(user);
