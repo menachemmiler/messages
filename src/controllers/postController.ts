@@ -2,20 +2,19 @@ import exp, { json, Request, Response, Router } from "express";
 import PostService from "../services/postService";
 import NewPostDTO from "../DTO/NewPostDTO";
 import Post from "../models/postModel";
+import ResponseMessage from "DTO/ResponseMessage";
 
 const router: Router = exp.Router();
 
 router.get(
   "/",
-  async (
-    req: Request,
-    res: Response<{ allPosts: Post[] } | any>
-  ): Promise<void> => {
+  async (req: Request, res: Response<ResponseMessage>): Promise<void> => {
     try {
       const allPosts: Post[] = (await PostService.getAllPosts()) as Post[];
       if (allPosts) {
         res.status(200).json({
-          allPosts,
+          err: false,
+          message: allPosts
         });
       } else {
         res.status(404).json({
@@ -62,10 +61,9 @@ router.post(
 router.get("/search", async (req: Request, res: Response): Promise<void> => {
   try {
     const search: any = req.query.content;
-    // if(!search) res.status(400).json
     const resoulte = await getPostByContent(search);
     res.status(200).json({
-      ...resoulte
+      ...resoulte,
     });
   } catch (err: any) {
     res.status(404).json({
@@ -75,8 +73,7 @@ router.get("/search", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-const getPostByContent = async (search: string): Promise<any> => {
-  
+const getPostByContent = async (search: string): Promise<ResponseMessage> => {
   try {
     const allPosts: Post[] = (await PostService.getAllPosts()) as Post[];
     const allIncluedsContent = allPosts.filter((a) => {
@@ -101,19 +98,44 @@ const getPostByContent = async (search: string): Promise<any> => {
   }
 };
 
-con
+const getPostById = async (id: string): Promise<ResponseMessage> => {
+  try {
+    const allPosts: Post[] = (await PostService.getAllPosts()) as Post[];
+    const withSameId = allPosts.filter((a) => {
+      return a.id == id;
+    });
+    if (withSameId.length) {
+      return {
+        err: false,
+        message: withSameId,
+      };
+    } else {
+      return {
+        err: false,
+        message: "אין פוסטים עם המזהה הזה",
+      };
+    }
+  } catch (err: any) {
+    return {
+      err: true,
+      message: "שגיאת חיפוש לפי מזהה",
+    };
+  }
+};
 
 router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    res.status(200).json({
-      err: false,
-      message: "5.2: post/:id (קבלת הודעה לפי מזהה של ההודעה)",
-      data: undefined,
-    });
+    console.log(req.params.id);
+    const resoulte = await getPostById(req.params.id);
+    if (resoulte.err) {
+      res.status(404).json(resoulte);
+    } else {
+      res.status(200).json(resoulte);
+    }
   } catch (err: any) {
     res.status(404).json({
       err: true,
-      message: "defoulte eror",
+      message: `שגיאה בקבלת פוסט לפי מזהה${err}`,
     });
   }
 });
