@@ -1,4 +1,5 @@
 import exp, { Express } from "express";
+import cookieParser from "cookie-parser";
 import authController from "./controllers/authController";
 import userController from "./controllers/userController";
 import postController from "./controllers/postController";
@@ -8,6 +9,7 @@ import "dotenv/config";
 
 const app: Express = exp();
 app.use(exp.json());
+app.use(cookieParser());
 
 app.use("/auth", authController);
 app.use("/user", userController);

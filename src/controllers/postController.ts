@@ -2,7 +2,7 @@ import exp, { json, Request, Response, Router } from "express";
 import PostService from "../services/postService";
 import NewPostDTO from "../DTO/NewPostDTO";
 import Post from "../models/postModel";
-import ResponseMessage from "DTO/ResponseMessage";
+import ResponseMessage from "../DTO/ResponseMessage";
 
 const router: Router = exp.Router();
 
@@ -14,7 +14,7 @@ router.get(
       if (allPosts) {
         res.status(200).json({
           err: false,
-          message: allPosts
+          message: allPosts,
         });
       } else {
         res.status(404).json({
@@ -81,18 +81,18 @@ const getPostByContent = async (search: string): Promise<ResponseMessage> => {
     });
     if (allIncluedsContent.length) {
       return {
-        arr: false,
+        err: false,
         message: allIncluedsContent,
       };
     } else {
       return {
-        arr: false,
+        err: false,
         message: "אין פוסטים עם החיפוש הזה",
       };
     }
   } catch (err: any) {
     return {
-      arr: true,
+      err: true,
       message: "erorr search",
     };
   }
@@ -123,36 +123,45 @@ const getPostById = async (id: string): Promise<ResponseMessage> => {
   }
 };
 
-router.get("/:id", async (req: Request, res: Response): Promise<void> => {
-  try {
-    console.log(req.params.id);
-    const resoulte = await getPostById(req.params.id);
-    if (resoulte.err) {
-      res.status(404).json(resoulte);
-    } else {
-      res.status(200).json(resoulte);
-    }
-  } catch (err: any) {
-    res.status(404).json({
-      err: true,
-      message: `שגיאה בקבלת פוסט לפי מזהה${err}`,
-    });
-  }
-});
-
 router.patch(
-  "/like/:id",
-  async (req: Request, res: Response): Promise<void> => {
+  "/like",
+  async (req: Request, res: Response<ResponseMessage>): Promise<void> => {
     try {
+      const resoulte = await PostService.LikePost(req.body);
+      if (!resoulte) {
+        res.status(404).json({
+          err: true,
+          message: "defoulte eror",
+        });
+      }
       res.status(200).json({
         err: false,
-        message: "like to post",
-        data: undefined,
+        message: "הליק התווסף בהצלחה"
       });
     } catch (err: any) {
       res.status(404).json({
         err: true,
-        message: "defoulte eror",
+        message: "like eror",
+      });
+    }
+  }
+);
+
+router.get(
+  "/:id",
+  async (req: Request, res: Response<ResponseMessage>): Promise<void> => {
+    try {
+      console.log(req.params.id);
+      const resoulte = await getPostById(req.params.id);
+      if (resoulte.err) {
+        res.status(404).json(resoulte);
+      } else {
+        res.status(200).json(resoulte);
+      }
+    } catch (err: any) {
+      res.status(404).json({
+        err: true,
+        message: `שגיאה בקבלת פוסט לפי מזהה${err}`,
       });
     }
   }
